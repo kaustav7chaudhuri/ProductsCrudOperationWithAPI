@@ -1,0 +1,126 @@
+﻿@model WebProduct
+
+
+@{
+    ViewData["Title"] = "Create Product";
+}
+<html>
+<head>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+            $(document).ready(function () {
+
+            var errorMessage = '@ViewBag.ErrorMessage';
+            if (errorMessage) {
+                alert(errorMessage);
+            }
+                $('#txtProductName').on('input', function () {
+                      this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+                });
+                     $('#txtPrice, #txtStockQty').on('input', function () {
+                      this.value = this.value.replace(/[^0-9]/g, '');
+                 });
+           });
+                function insertNotify()
+                              {
+                                  if(Validation()){
+                                      alert("passed");
+                                  }
+                              }
+            function Validation(){
+          if($("#txtProductName").val().trim() == ""){
+              alert("Product Name is required");
+              return false;
+          }
+          if($("#txtProductDesc").val().trim() == ""){
+              alert("Product Description is required");
+              return false;
+            }
+              if($("#txtPrice").val().trim() == "" || $("#txtPrice").val().trim() <= 0){
+              alert("Product Price is required and must be greater than 0");
+              return false;
+            }
+                if($("#txtStockQty").val().trim() == "" || $("#txtStockQty").val().trim() <= 0){
+                      alert("Product Stock Quantity is required and must be greater than 0");
+                      return false;
+                }
+                  if($("#ddlCategory option:selected").val() == "0"){
+                      alert("Please select Category");
+                        return false;
+                  }
+                    if($("#ddlManufacturer option:selected").val() == "0"){
+                        alert("Please select Manufacturer");
+                        return false;
+                      }
+        }
+    </script>
+</head>
+<body>
+    <h1 style="text-align:center">@ViewData["Title"]</h1>
+    <form asp-action="CreateProduct" asp-controller="Product" style="margin-left:350px">
+        <div class="form-group col-8">
+            <label asp-for="ProductName"></label>
+            <input asp-for="ProductName" id="txtProductName" class="form-control" required />
+            <span asp-validation-for="ProductName" class="text-danger"></span>
+        </div>
+        <div class="form-group col-8">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" id="txtProductDesc" class="form-control" maxlength="500" required></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div class="form-group col-8">
+            <label asp-for="Price"></label>
+            <input asp-for="Price" id="txtPrice" class="form-control" required />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+        <div class="form-group col-8">
+            <label asp-for="StockQnty"></label>
+            <input asp-for="StockQnty" id="txtStockQty" class="form-control" required />
+            <span asp-validation-for="StockQnty" class="text-danger"></span>
+        </div>
+        <div class="form-group col-8">
+            <label asp-for="Category"></label>
+            <select asp-for="Category" asp-items="ViewBag.CategoriesList" class="form-control" id="ddlCategory">
+                <option value="0">--Select Category--</option>
+            </select>
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+        <div class="form-group col-8">
+            <label asp-for="Manufacturer"></label>
+            <select asp-for="Manufacturer" asp-items="ViewBag.ManufacturersList" class="form-control" id="ddlManufacturer">
+                <option value="0">--Select Manufacturer--</option>
+            </select>
+            <span asp-validation-for="Manufacturer" class="text-danger"></span>
+        </div>
+
+        <div class="form-group col-8" style="margin-top:5px">
+            <label asp-for="ProductAvailability"></label> :
+            <input asp-for="ProductAvailability" type="radio" class="clsRadProductAvailable" value="Available" checked /> Available
+            <input asp-for="ProductAvailability" type="radio" class="clsRadProductAvailable" value="OutOfStock" /> Out of Stock
+            <span asp-validation-for="ProductAvailability" class="text-danger"></span>
+        </div>
+        <div class="form-group col-8" style="display: flex; gap: 20px;">
+            <div style="margin-bottom:5px;margin-top:5px">
+                <label asp-for="IsOnSale"></label>
+                <input asp-for="IsOnSale" id="chkIsSale" type="checkbox" />
+                <span asp-validation-for="IsOnSale" class="text-danger"></span>
+            </div>
+            <div style="margin-top:5px" class="col-8">
+                <label asp-for="IsNewArrival"></label>
+                <input asp-for="IsNewArrival" id="chkIsArrival" type="checkbox" />
+                <span asp-validation-for="IsNewArrival" class="text-danger"></span>
+            </div>
+        </div>
+        @* <div class="form-group">
+                <label asp-for="IsNewArrival"></label>
+                <input asp-for="IsNewArrival" id="chkIsArrival" type="checkbox" />
+                <span asp-validation-for="IsNewArrival" class="text-danger"></span>
+            </div> *@
+        <div style="margin-top:15px; text-align:center" class="col-8">
+            <button type="submit" class="btn btn-primary" onclick="insertNotify()">Create Product</button>
+            &nbsp; &nbsp;
+            <a asp-action="Index" asp-controller="Product" class="btn btn-outline-danger">Back</a>
+          </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,200 @@
+﻿@model IEnumerable<WebProduct>
+<script src="~/js/html2pdf.bundle.min.js"></script>
+@{
+    ViewData["Title"] = "Product List";
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+@if (TempData["CreateSuccess"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            alert('@TempData["CreateSuccess"]');
+        });
+    </script>
+}
+@if (TempData["UpdateSuccess"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            alert('@TempData["UpdateSuccess"]');
+        });
+    </script>
+}
+@if (TempData["DeleteProduct"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            alert('@TempData["DeleteProduct"]');
+        });
+    </script>
+}
+<html>
+<head>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+              $(document).on("click", "#tblProduct tbody tr", function(){
+                  debugger;
+                  var currentRow = $(this).closest('tr');
+                  var Productid = currentRow.find('.clsProductId').text().trim();
+                  window.location.href = '/Product/UpdateProduct?str_PRODUCTID=' + Productid;
+              });
+
+
+            $('#exportTableBtnExcel').on('click', function () {
+            let Norows = $('#tblProduct tr');
+
+            if (Norows.length <= 1 || (Norows.length > 1 && Norows.eq(1).find('td').eq(0).text().trim() == "No Record Found")) {
+                alert("No data to export");
+                return;
+            }
+
+            let csv = [];
+            let rows = $('#tblProduct tr');
+
+            // Include all headers
+            let headerRow = rows.eq(0).find('th');
+            let headers = [];
+            headerRow.each(function () {
+                headers.push($(this).text().trim());
+            });
+            csv.push(headers.join(','));
+
+            // Include all data cells
+            rows.slice(1).each(function () {
+                let rowData = [];
+                $(this).find('td').each(function () {
+                    let text = $(this).text().trim();
+                    if (text.includes(',') || text.includes('"')) {
+                        text = '"' + text.replace(/"/g, '""') + '"';
+                    }
+                    rowData.push(text);
+                });
+                csv.push(rowData.join(','));
+            });
+
+            let csvString = csv.join('\n');
+            let blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            let link = document.createElement('a');
+            if (link.download !== undefined) {
+                let url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'ProductList.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                console.error("Download attribute not supported.");
+            }
+        });
+
+
+                $('#exportTableBtnPdf').on('click', function () {
+            let $rows = $('#tblProduct tbody tr');
+
+            // Check if there's data in the table
+            if ($rows.length === 0 || ($rows.length === 1 && $rows.eq(0).text().includes("No Record Found"))) {
+                alert("No data to export");
+                return;
+            }
+
+            // Clone the table
+            let $tableClone = $('#tblProduct').clone();
+
+            // Apply formatting styles
+            $tableClone.css({
+                'border-collapse': 'collapse',
+                'width': '100%'
+            });
+
+            $tableClone.find('th, td').css({
+                'border': '1px solid black',
+                'padding': '6px',
+                'font-size': '12px',
+                'text-align': 'left'
+            });
+
+            // Create a container with title
+            let $wrapper = $('<div></div>');
+            let $title = $('<h2 style="text-align: center;">Product List</h2>');
+            $wrapper.append($title).append($tableClone);
+
+            // Generate PDF
+            html2pdf().from($wrapper[0]).set({
+                margin: 10,
+                filename: 'ProductList.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            }).save();
+        });
+
+        });
+    </script>
+</head>
+
+<body>
+    <div style="text-align:center">
+    <h1>@ViewData["Title"]</h1>
+    </div>
+    <div style="margin-bottom:30px; float:right;">
+        <a asp-action="CreateProduct" asp-controller="Product" class="btn btn-outline-success" style=" width:250px; text-decoration:solid"><i class="bi bi-plus-circle"></i> Create</a>
+    </div>
+    
+        <table class="table table-bordered table-striped" style="padding-left:-50px" width="20%" height="90%" id="tblProduct">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Product Description</th>
+                    <th>Price</th>
+                    <th>Stock Quantity</th>
+                    <th>Category</th>
+                    <th>Manufacturer</th>
+                    <th>Product Availability</th>
+                    <th>On Sale Status</th>
+                    <th>New Arrival Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="10" style="text-align:center">No Record Found</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td class="clsProductId">@product.ProductId</td>
+                            <td class="clsProductName">@product.ProductName</td>
+                            <td class="clsDesc">@product.Description</td>
+                            <td class="clsPrice">@product.Price</td>
+                            <td class="clsStockQty">@product.StockQnty</td>
+                            <td class="clsCategory">@product.Category</td>
+                            <td class="clsManufacture">@product.Manufacturer</td>
+                            <td class="clsProductAvailability">@product.ProductAvailability</td>
+                            <td class="clsIsOnSale">@(product.IsOnSale ? "Yes" : "No")</td>
+                            <td class="clsIsNewArrival">@(product.IsNewArrival ? "Yes" : "No")</td>
+                        </tr>
+                    }
+
+                }
+            </tbody>
+        </table>
+
+    <div style="margin-top:10px; float:left;">
+        <button id="exportTableBtnExcel" class="btn btn-primary flex items-center">
+            <i class="bi bi-file-earmark-arrow-down mr-2"></i>Export to Excel
+        </button>
+
+        <button id="exportTableBtnPdf" class="btn btn-primary flex items-center">
+            <i class="bi bi-file-earmark-arrow-down mr-2"></i>Export to PDF
+        </button>
+    </div>
+</body>
+</html>
