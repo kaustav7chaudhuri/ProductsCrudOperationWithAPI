@@ -4,6 +4,11 @@
     ViewData["Title"] = "Product List";
 }
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> *@
+<script src="f:\testing\technocoon interview\productscrudoperation\productweb\javascript\html2canvas.min.js"></script>
+<script src="f:\testing\technocoon interview\productscrudoperation\productweb\javascript\jspdf.umd.min.js"></script>
+
 @if (TempData["CreateSuccess"] != null)
 {
     <script>
@@ -91,45 +96,51 @@
         });
 
 
-                $('#exportTableBtnPdf').on('click', function () {
-            let $rows = $('#tblProduct tbody tr');
+        $('#exportTableBtnPdf').on('click', function () {
+                let $table = $('#tblProduct').clone();
 
-            // Check if there's data in the table
-            if ($rows.length === 0 || ($rows.length === 1 && $rows.eq(0).text().includes("No Record Found"))) {
-                alert("No data to export");
-                return;
-            }
+                // Wrap table in a responsive container
+                let $wrapper = $('<div style="width:100%; font-family:Arial;"></div>');
+                $wrapper.append('<h2 style="text-align: center; margin-bottom: 20px;">Product List</h2>');
 
-            // Clone the table
-            let $tableClone = $('#tblProduct').clone();
+                // Apply tighter and consistent styles
+                $table.css({
+                    'width': '100%',
+                    'border-collapse': 'collapse',
+                    'table-layout': 'fixed'
+                });
 
-            // Apply formatting styles
-            $tableClone.css({
-                'border-collapse': 'collapse',
-                'width': '100%'
+                $table.find('th, td').css({
+                    'border': '1px solid black',
+                    'padding': '6px 4px',
+                    'font-size': '10px',
+                    'text-align': 'left',
+                    'word-break': 'break-word',
+                    'vertical-align': 'top'
+                });
+
+                // Set fixed width for each column (optional: adjust as needed)
+                $table.find('th').css('width', '10%');
+
+                $wrapper.append($table);
+
+                html2pdf().from($wrapper[0]).set({
+                    margin: 10,
+                    filename: 'ProductList.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        scrollY: 0
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'landscape'
+                    },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                }).save();
             });
-
-            $tableClone.find('th, td').css({
-                'border': '1px solid black',
-                'padding': '6px',
-                'font-size': '12px',
-                'text-align': 'left'
-            });
-
-            // Create a container with title
-            let $wrapper = $('<div></div>');
-            let $title = $('<h2 style="text-align: center;">Product List</h2>');
-            $wrapper.append($title).append($tableClone);
-
-            // Generate PDF
-            html2pdf().from($wrapper[0]).set({
-                margin: 10,
-                filename: 'ProductList.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            }).save();
-        });
 
         });
     </script>
